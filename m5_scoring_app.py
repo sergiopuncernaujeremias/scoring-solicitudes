@@ -38,12 +38,22 @@ def load_pisos() -> List[Dict[str, Any]]:
 
 def load_solicitudes_by_piso(id_piso: str) -> List[Dict[str, Any]]:
     """Carga todas las solicitudes/candidatos para un piso."""
+    # Aseguramos que lo que mandamos al filtro es un string
+    id_piso_str = str(id_piso)
+
+    # Debug temporal: ver qué estamos buscando
+    st.write("DEBUG · Buscando solicitudes con id_piso =", id_piso_str)
+
     res = (
-        supabase.table("solicitudes")
+        supabase
+        .table("solicitudes")          # OJO: aquí debe ser exactamente el nombre de tu tabla
         .select("*")
-        .eq("id_piso", id_piso)
+        .eq("id_piso", id_piso_str)    # OJO: y aquí el nombre exacto de la columna en Supabase
         .execute()
     )
+
+    st.write("DEBUG · Respuesta Supabase solicitudes:", res.data)
+
     return res.data or []
 
 
