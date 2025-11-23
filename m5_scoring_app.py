@@ -62,7 +62,7 @@ def build_piso_label(piso: Dict[str, Any]) -> str:
     barrio = piso.get("barrio_ciudad") or "Zona desconocida"
     precio = piso.get("precio")
     m2 = piso.get("m2")
-    id_corto = str(piso.get("id"))[:8] if piso.get("id") else "sin-id"
+    id_corto = str(piso.get("id_piso"))[:8] if piso.get("id_piso") else "sin-id"
 
     partes = [f"[{id_corto}]"]
     if barrio:
