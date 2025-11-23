@@ -165,6 +165,7 @@ with st.expander("Ver detalles del piso seleccionado"):
     st.json(
         {
             "id": piso_seleccionado.get("id"),
+            "id_piso": piso_seleccionado.get("id_piso"),
             "descripcion_ia": piso_seleccionado.get("descripcion_ia"),
             "precio": piso_seleccionado.get("precio"),
             "barrio_ciudad": piso_seleccionado.get("barrio_ciudad"),
