@@ -181,7 +181,7 @@ with st.expander("Ver detalles del piso seleccionado"):
 
 # --- Carga de solicitudes para ese piso ---
 with st.spinner("Cargando solicitudes de candidatos..."):
-    solicitudes = load_solicitudes_by_piso(piso_seleccionado["id"])
+    solicitudes = load_solicitudes_by_piso(piso_seleccionado["id_piso"])
 
 if not solicitudes:
     st.warning("Este piso todavía no tiene solicitudes en la tabla `solicitudes`.")
