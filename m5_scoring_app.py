@@ -41,6 +41,15 @@ def load_solicitudes_by_piso(id_piso: str) -> List[Dict[str, Any]]:
     # Aseguramos que lo que mandamos al filtro es un string
     id_piso_str = str(id_piso)
 
+res = (
+        supabase
+        .table("solicitudes")          # OJO: aquí debe ser exactamente el nombre de tu tabla
+        .select("*")
+        .eq("id_piso", id_piso_str)    # OJO: y aquí el nombre exacto de la columna en Supabase
+        .execute()
+        )
+    return res.data or []
+
 def build_piso_label(piso: Dict[str, Any]) -> str:
     """Texto amigable para el selectbox de pisos."""
     barrio = piso.get("barrio_ciudad") or "Zona desconocida"
