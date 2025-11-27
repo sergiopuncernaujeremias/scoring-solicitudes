@@ -35,20 +35,15 @@ def load_pisos() -> List[Dict[str, Any]]:
     res = supabase.table("pisos").select("*").execute()
     return res.data or []
 
-
 def load_solicitudes_by_piso(id_piso: str) -> List[Dict[str, Any]]:
     """Carga todas las solicitudes/candidatos para un piso."""
-    # Aseguramos que lo que mandamos al filtro es un string
-    id_piso_str = str(id_piso)
-
-res = (
-        supabase
-        .table("solicitudes")          # OJO: aquí debe ser exactamente el nombre de tu tabla
+    res = (
+        supabase.table("solicitudes")
         .select("*")
-        .eq("id_piso", id_piso_str)    # OJO: y aquí el nombre exacto de la columna en Supabase
+        .eq("id_piso", id_piso)
         .execute()
-)
-return res.data or []
+    )
+    return res.data or []
 
 def build_piso_label(piso: Dict[str, Any]) -> str:
     """Texto amigable para el selectbox de pisos."""
