@@ -243,3 +243,4 @@ if ejecutar_scoring:
         )
 else:
     st.info("Pulsa el botón de arriba para calcular el scoring de los candidatos.")
+
