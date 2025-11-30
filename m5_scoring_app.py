@@ -118,24 +118,118 @@ def call_n8n_scoring(piso: Dict[str, Any], candidato: Dict[str, Any]) -> Dict[st
 # ------------------------------
 # UI Streamlit
 # ------------------------------
-st.title("🏠 RentMatch · M5 Scoring / priorización de candidatos")
+APP_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+    color: #1f2937;
+}
+
+/* Main container adjustments */
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 3rem;
+    max_width: 1200px;
+}
+
+/* Cards */
+.rm-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s ease;
+}
+.rm-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+/* Hero Section */
+.rm-hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.rm-hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+}
+.rm-hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.rm-hero-icon {
+    font-size: 3.5rem;
+    background: rgba(255,255,255,0.2);
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+}
+.rm-hero-text h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2.25rem;
+    color: white;
+    letter-spacing: -0.025em;
+}
+.rm-hero-text p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.9);
+}
+
+/* Utilities */
+.text-sm { font-size: 0.875rem; }
+.text-muted { color: #6b7280; }
+.font-bold { font-weight: 600; }
+</style>
+"""
+
+st.markdown(APP_CSS, unsafe_allow_html=True)
 
 st.markdown(
     """
-Esta pantalla es para el **arrendador**.
-
-1. Selecciona un piso.
-2. Verás todas las solicitudes para ese piso.
-3. Pulsa **“Calcular scoring con IA (vía n8n)”** para que GPT, desde n8n, evalúe a los candidatos.
-"""
+    <div class="rm-hero">
+      <div class="rm-hero-content">
+        <div class="rm-hero-icon">🏆</div>
+        <div class="rm-hero-text">
+          <h1>RentMatch · Scoring</h1>
+          <p>Priorización inteligente de candidatos con IA</p>
+        </div>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 # --- Carga de pisos ---
+st.markdown("<div class='rm-card'>", unsafe_allow_html=True)
+st.subheader("1. Selección del Inmueble")
 with st.spinner("Cargando pisos desde Supabase..."):
     pisos = load_pisos()
 
 if not pisos:
     st.info("No se han encontrado pisos en la tabla `pisos`.")
+    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # Mapeamos labels para el selectbox
@@ -166,16 +260,21 @@ with st.expander("Ver detalles del piso seleccionado"):
             "admite_mascotas_inquilino": piso_seleccionado.get("admite_mascotas_inquilino"),
         }
     )
+st.markdown("</div>", unsafe_allow_html=True)
 
 # --- Carga de solicitudes para ese piso ---
+st.markdown("<div class='rm-card'>", unsafe_allow_html=True)
+st.subheader("2. Candidatos y Scoring")
+
 with st.spinner("Cargando solicitudes de candidatos..."):
     solicitudes = load_solicitudes_by_piso(piso_seleccionado["id_piso"])
 
 if not solicitudes:
     st.warning("Este piso todavía no tiene solicitudes en la tabla `solicitudes`.")
+    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
-st.subheader("📋 Solicitudes encontradas para este piso")
+st.write(f"Se han encontrado **{len(solicitudes)}** solicitudes.")
 
 df_solicitudes = pd.DataFrame(solicitudes)
 
@@ -188,9 +287,9 @@ st.dataframe(df_solicitudes[cols_visibles], use_container_width=True)
 
 # --- Botón para lanzar scoring vía n8n/GPT ---
 st.markdown("---")
-st.subheader("⚙️ Scoring de candidatos con IA (GPT vía n8n)")
+st.write("Pulsa el botón para analizar la afinidad de cada candidato con las preferencias del piso.")
 
-ejecutar_scoring = st.button("Calcular scoring con IA (vía n8n)")
+ejecutar_scoring = st.button("✨ Calcular scoring con IA (vía n8n)", type="primary")
 
 if ejecutar_scoring:
     resultados = []
@@ -223,7 +322,7 @@ if ejecutar_scoring:
     st.dataframe(df_resultados, use_container_width=True)
 
     # Vista tipo “cards” opcional
-    st.markdown("### Vista resumida")
+    st.markdown("### Vista detallada")
     for _, row in df_resultados.iterrows():
         score_txt = (
             f"{int(row['score_afinidad'])}/100"
@@ -232,15 +331,22 @@ if ejecutar_scoring:
         )
         st.markdown(
             f"""
-**{row['candidato']}** — **{score_txt}**  
-{row['explicacion']}
-
-- [ ] Contactar  
-- [ ] Descartar  
-
----
-"""
+            <div style="background:#f9fafb; padding:1rem; border-radius:8px; margin-bottom:1rem; border:1px solid #e5e7eb;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <h4 style="margin:0;">{row['candidato']}</h4>
+                    <span style="background:#4f46e5; color:white; padding:2px 8px; border-radius:12px; font-size:0.9rem; font-weight:bold;">{score_txt}</span>
+                </div>
+                <p style="font-size:0.95rem; color:#4b5563; margin-bottom:0.5rem;">{row['explicacion']}</p>
+                <div style="display:flex; gap:1rem; font-size:0.9rem;">
+                    <label><input type="checkbox"> Contactar</label>
+                    <label><input type="checkbox"> Descartar</label>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 else:
     st.info("Pulsa el botón de arriba para calcular el scoring de los candidatos.")
+
+st.markdown("</div>", unsafe_allow_html=True)
 
